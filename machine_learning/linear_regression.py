@@ -67,7 +67,7 @@ def main():
     y_test_pred = x_test @ w + b
     test_mse = Loss.mse(y_test_pred, y_test)
     print("===== Training Finished =====")
-    print(f"Test Set MSE Loss：{test_mse:.4f}")
+    print(f"MSE Loss On Test Set：{test_mse:.4f}")
     print(f"Final weights w: {np.round(w, 3)}")
     print(f"Final bias b: {np.round(b, 3)}")
 
