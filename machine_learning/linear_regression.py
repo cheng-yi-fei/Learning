@@ -5,22 +5,13 @@ from ucimlrepo import fetch_ucirepo
 
 
 class Loss:
-
     @staticmethod
     def mse(y_pred: np.ndarray, y_true: np.ndarray) -> float:
-        n = y_true.shape[0]
-        loss_val = np.sum((y_pred - y_true) ** 2) / n
+        loss_val = np.sum(np.square(y_pred - y_true)) / y_true.shape[0]
         return loss_val
 
     @staticmethod
     def compute_gradient(x: np.ndarray, y_true: np.ndarray, w: np.ndarray, b: float):
-        """
-        :param x: (N, feature_dim)
-        :param y_true: (N, )
-        :param w: (feature_dim, )
-        :param b: scalar
-        :return: grad_w, grad_b
-        """
         n = x.shape[0]
         y_pred = x @ w + b
         diff = y_pred - y_true
@@ -31,24 +22,23 @@ class Loss:
 
 
 class GradientDescent:
-    """optimizer class"""
     def __init__(self, learning_rate: float):
         self.lr = learning_rate
 
     def update(self, w: np.ndarray, b: float, grad_w: np.ndarray, grad_b: float):
-        w_new = w - self.lr * grad_w
-        b_new = b - self.lr * grad_b
-        return w_new, b_new
+        w = w - self.lr * grad_w
+        b = b - self.lr * grad_b
+        return w, b
 
 
 def main():
     concrete_compressive_strength = fetch_ucirepo(id=165)
-
     x_raw = concrete_compressive_strength.data.features.to_numpy()
     y_raw = concrete_compressive_strength.data.targets.to_numpy().ravel()
-
+    print(x_raw)
+    print(y_raw)
     x_train, x_test, y_train, y_test = train_test_split(
-        x_raw, y_raw, test_size=0.2, random_state=42
+        x_raw, y_raw, test_size=0.2, random_state=0
     )
 
     scaler = StandardScaler()
@@ -57,14 +47,15 @@ def main():
 
     n_features = x_train.shape[1]
 
-    w = np.zeros(n_features)
+    np.random.seed(0)
+    w = np.random.normal(loc=0.0, scale=0.01, size=n_features)
     b = 0.0
     lr = 0.03
-    epoch_num = 800
+    num_epoch = 5000
 
     optimizer = GradientDescent(learning_rate=lr)
 
-    for epoch in range(epoch_num):
+    for epoch in range(num_epoch):
         grad_w, grad_b = Loss.compute_gradient(x_train, y_train, w, b)
         w, b = optimizer.update(w, b, grad_w, grad_b)
 
@@ -75,9 +66,9 @@ def main():
 
     y_test_pred = x_test @ w + b
     test_mse = Loss.mse(y_test_pred, y_test)
-    print("\n===== Training Finished =====")
+    print("===== Training Finished =====")
     print(f"Test Set MSE Loss：{test_mse:.4f}")
-    print(f"Final weights w:\n{np.round(w, 3)}")
+    print(f"Final weights w: {np.round(w, 3)}")
     print(f"Final bias b: {np.round(b, 3)}")
 
 
