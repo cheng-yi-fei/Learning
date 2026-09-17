@@ -15,7 +15,7 @@ class RegularizedLogisticGD:
 
     def fit(self, X, y):
         n_samples, n_features = X.shape
-        # Xavier Gaussian initialization same as ridge regression homework
+        # Xavier Gaussian initialization 
         self.w = np.random.randn(n_features) / np.sqrt(n_features)
 
         for i in range(self.max_iter):
